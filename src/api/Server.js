@@ -1,7 +1,22 @@
-import Class from "../class/Class"
-/**
- * Provide ordering to the result set..
- */
-export default class Server extends Class {
+import Class from "../class/Class";
 
+export default class Server extends Class {
+    __port;
+    __server;
+
+    constructor(port) {
+        super();
+    }
+
+    routeJson(RoutePath){
+        return this;
+    }
+
+    upload(){
+        return this;
+    }
+
+    start(){
+
+    }
 }
