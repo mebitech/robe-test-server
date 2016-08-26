@@ -1,101 +1,97 @@
-import Class from "../class/Class"
-const multer = require("multer");
+import multer from "multer";
+import path from "path";
+import escapeRegexp from "escape-string-regexp";
+import Class from "../class/Class";
+import Generator from "../util/Generator";
+import bodyParser from "body-parser";
+
+const jsonParser = bodyParser.json({ type: "application/json" });
 
 export default class UploadRouter extends Class {
 
     __server;
     __tempPath;
     __requestPath;
+    __upload;
     constructor(server, tempPath, requestPath) {
         super();
         this.__server = server;
-        this.__dbPath = dbPath;
+        this.__tempPath = tempPath;
         this.__requestPath = !requestPath ? "/" : requestPath;
-        this.__idField = !idField ? "id" : idField;
+        const __this = this;
+        const storage = multer.diskStorage({
+            destination: this.__tempPath, // Specifies upload location...
+            filename: function (req, file, cb) {
+                /*
+                 switch (file.mimetype) { // *Mimetype stores the file type, set extensions according to filetype
+                 case "image/jpeg":
+                 ext = ".jpeg";
+                 break;
+                 case "image/png":
+                 ext = ".png";
+                 break;
+                 case "image/gif":
+                 ext = ".gif";
+                 break;
+                 }
+                 */
+                const id = Generator.guid();
+                file.filename = id;
+                fs.writeFileSync(path.normalize(path.join(__this.__tempPath) + "/" + id + ".json"), JSON.stringify(file), "utf8");
+                cb(null, id);
+            }
+        });
+        this.__upload = multer({ storage: storage });
     }
 
     route() {
-        this.__server.get(this.__requestPath + "/:entity", this.__getAll);
-        this.__server.get(this.__requestPath + "/:entity/:id", this.__get);
-        this.__server.post(this.__requestPath + "/:entity", this.__post);
-        this.__server.put(this.__requestPath + "/:entity/:id", this.__put);
-        this.__server.del(this.__requestPath + "/:entity/:id", this.__del);
-        this.__server.get(this.__requestPath + "/res/et/:entity/", this.__reset);
+        let regExpPath = new RegExp(
+            escapeRegexp(this.__requestPath) + ".*");
+        this.__server.put(regExpPath,
+            this.__upload.array("files"), this._upload);
+        this.__server.post(regExpPath, jsonParser, this._info);
+        this.__server.del(new RegExp(escapeRegexp(this.__requestPath) + ".*"), this._delete);
         return this;
     }
 
-    __getAll(req, res) {
-        let entityName = req.params.entity;
-        if (!this.__db[entityName]) {
-            return res.status(400).send(`no such entity found. entity name: ${entityName}`);
-        }
-        return res.send(this.__db[entityName]);
-    }
-
-    __get(req, res) {
-        let entityName = req.params.entity;
-        if (!this.__db[entityName]) {
-            return res.status(400).send(`no such entity found. entity name: ${entityName}`);
-        }
-        let entities = this.__db[entityName];
-        for (let i = 0; i < entities.length; i++) {
-            let entity = entities[i];
-            if (entity[this.__idField].toString() === req.params.id) {
-                return res.send(entity);
+    _info(request, response){
+        let data;
+        if (Object.prototype.toString.call(request.body) === "[object Array]") {
+            data = [];
+            for (let i = 0; i < request.body.length; i++) {
+                console.log("Loaded file by " + request.body[i] + " file key");
+                data.push(loadFile(request.body[i]));
             }
+        } else {
+            let fileName = typeof  request.body === "string" ? request.body: request.body.filename;
+            console.log("Loaded file by " + fileName + " file key");
+            data = loadFile(request.body.filename);
         }
-        return res.status(400).send(`entity not found. entity name: ${entityName} ${this.__idField}: ${req.params.id}`);
+        response.status(200).send(data);
     }
 
-    __post(req, res) {
-        let entityName = req.params.entity;
-        if (!this.__db[entityName]) {
-            return res.status(400).send(`no such entity found. entity name: ${entityName}`);
-        }
-        this.__db[entityName].push(req.body);
-        return res.send(`entity added to ${entityName}`);
+    _upload(request, response) {
+        response.status(200).send(request.files);
     }
 
-    __put(req, res) {
-        let entityName = req.params.entity;
-        if (!this.__db[entityName]) {
-            return res.send(`no such entity found. entity name: ${entityName}`);
-        }
-        let entities = this.__db[entityName];
-        for (let i = 0; i < entities.length; i++) {
-            let entity = entities[i];
-            if (entity[this.__idField].toString() === req.params.id) {
-                this.__db[entityName][i] = req.body;
-                return res.send(`entity updated. entity name ${entityName}`);
+    _delete(request, res) {
+        var body = "";
+        request.on("data", (data) => {
+            body += data;
+            // Too much POST data, kill the connection!
+            // 1e6 === 1 * Math.pow(10, 6) === 1 * 1000000 ~~~ 1MB
+            if (body.length > 1e6) {
+                request.connection.destroy();
             }
-        }
-        return res.send(`entity not found. entity name: ${entityName} ${this.__idField}: ${req.params.id}`);
+        });
+        request.on("end", () => {
+            const file = JSON.parse(body);
+            var filePath = path.normalize(file.path);
+            fs.unlinkSync(filePath);
+            fs.unlinkSync(filePath + ".json");
+            res.status(200).send(file);
+            // use post['blah'], etc.
+        });
+        // You can send any response to the user here
     }
-
-    __del(req, res) {
-        let entityName = req.params.entity,
-            id = req.params.id;
-        if (!this.__db[entityName]) {
-            return res.send(`no such entity found. entity name: ${entityName}`);
-        }
-        let entities = this.__db[entityName];
-        for (let i = 0; i < entities.length; i++) {
-            let entity = entities[i];
-            if (entity[this.__idField].toString() === req.params.id) {
-                this.__db[entityName].splice(i, 1);
-                return res.send(`entity deleted. entity name: ${entityName} ${this.__idField}: ${req.params.id} `);
-            }
-        }
-        return res.send(`entity not found. entity name: ${entityName} ${this.__idField}: ${req.params.id}`);
-    }
-
-    __reset(req, res) {
-        let entityName = req.params.entity;
-        if (!this.__db[entityName]) {
-            return res.send(`no such entity found. entity name: ${entityName}`);
-        }
-        this.__db[entityName] = this.__dbClone[entityName];
-        return res.send(`${entityName} has been reset`);
-    }
-
 }

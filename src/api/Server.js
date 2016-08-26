@@ -2,6 +2,7 @@ import Class from "../class/Class"
 import restify from "restify"
 import morgan from "morgan"
 import JSONRouter from "./JSONRouter"
+import UploadRouter from "./UploadRouter"
 import {decodeQueryParams} from "../util/middlewares"
 
 /**
@@ -26,11 +27,13 @@ export default class Server extends Class {
     }
 
     routeJSON(dbPath, requestPath, idField) {
-        new JSONRouter(this.__server, dbPath, requestPath, idField).route();
+        new JSONRouter(this.__server, dbPath, requestPath, idField).route()
+        return this;
     }
 
-    upload() {
-
+    routeUpload(tempPath, requestPath) {
+       new UploadRouter(this.__server, tempPath, requestPath).route();
+       return this;
     }
 
     start() {
