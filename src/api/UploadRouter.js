@@ -4,10 +4,8 @@ import escapeRegexp from "escape-string-regexp";
 import Class from "../class/Class";
 import Generator from "../util/Generator";
 import bodyParser from "body-parser";
-import multpartBodyParser from "restify-multipart-body-parser";
 const fs = require("fs");
 import FileUtility from "../util/FileUtility";
-import parser from "restify-multipart-body-parser";
 
 export default class UploadRouter extends Class {
 
