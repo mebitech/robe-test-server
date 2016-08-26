@@ -1,8 +1,16 @@
 import mime from "mime";
 import Class from "../class/Class";
+import appRoot from "app-root-path";
 
 class FileUtility extends Class {
 
+    getUserHome() {
+        return process.env.HOME || process.env.USERPROFILE;
+    }
+
+    getAppHome(){
+        return appRoot.path;
+    }
     getInformation(path){
         var nOffset = Math.max(0, Math.max(path.lastIndexOf("\\"), path.lastIndexOf("/")));
         var eOffset = path.lastIndexOf(".");

@@ -4,20 +4,24 @@ import escapeRegexp from "escape-string-regexp";
 import Class from "../class/Class";
 import Generator from "../util/Generator";
 import bodyParser from "body-parser";
-
-const jsonParser = bodyParser.json({ type: "application/json" });
+import multpartBodyParser from "restify-multipart-body-parser";
+const fs = require("fs");
+import FileUtility from "../util/FileUtility";
+import parser from "restify-multipart-body-parser";
 
 export default class UploadRouter extends Class {
 
     __server;
     __tempPath;
+    __detail;
     __requestPath;
     __upload;
-    constructor(server, tempPath, requestPath) {
+    constructor(server, tempPath,requestPath, __detail) {
         super();
         this.__server = server;
-        this.__tempPath = tempPath;
+        this.__tempPath = path.resolve(FileUtility.getAppHome(), tempPath);
         this.__requestPath = !requestPath ? "/" : requestPath;
+        this.__detail = __detail;
         const __this = this;
         const storage = multer.diskStorage({
             destination: this.__tempPath, // Specifies upload location...
@@ -35,6 +39,7 @@ export default class UploadRouter extends Class {
                  break;
                  }
                  */
+                console.log("File cammm");
                 const id = Generator.guid();
                 file.filename = id;
                 fs.writeFileSync(path.normalize(path.join(__this.__tempPath) + "/" + id + ".json"), JSON.stringify(file), "utf8");
@@ -45,33 +50,39 @@ export default class UploadRouter extends Class {
     }
 
     route() {
-        let regExpPath = new RegExp(
-            escapeRegexp(this.__requestPath) + ".*");
-        this.__server.put(regExpPath,
-            this.__upload.array("files"), this._upload);
-        this.__server.post(regExpPath, jsonParser, this._info);
+        this.__server.get(path.join(this.__requestPath, "__detail") , this._getInformation);
+        this.__server.put(this.__requestPath, this.__upload.array(),  this._upload);
+        this.__server.post(this.__requestPath, this._info);
         this.__server.del(new RegExp(escapeRegexp(this.__requestPath) + ".*"), this._delete);
         return this;
     }
 
+    _getInformation(request, response){
+        response.send(this.__detail);
+    }
     _info(request, response){
         let data;
         if (Object.prototype.toString.call(request.body) === "[object Array]") {
             data = [];
             for (let i = 0; i < request.body.length; i++) {
                 console.log("Loaded file by " + request.body[i] + " file key");
-                data.push(loadFile(request.body[i]));
+                data.push(this.__loadFile(request.body[i]));
             }
         } else {
             let fileName = typeof  request.body === "string" ? request.body: request.body.filename;
             console.log("Loaded file by " + fileName + " file key");
-            data = loadFile(request.body.filename);
+            data = this.__loadFile(request.body.filename);
         }
-        response.status(200).send(data);
+        response.send(data);
     }
 
-    _upload(request, response) {
-        response.status(200).send(request.files);
+    __loadFile(key) {
+        var file = fs.readFileSync(path.normalize(this.__tempPath + "/" + key + ".json"), "utf8");
+        return JSON.parse(file);
+    }
+
+    _upload(request, response, next) {
+        response.send(request.files);
     }
 
     _delete(request, res) {
@@ -84,6 +95,7 @@ export default class UploadRouter extends Class {
                 request.connection.destroy();
             }
         });
+
         request.on("end", () => {
             const file = JSON.parse(body);
             var filePath = path.normalize(file.path);
