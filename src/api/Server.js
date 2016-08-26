@@ -26,7 +26,7 @@ export default class Server extends Class {
     }
 
     routeJSON(dbPath, requestPath, idField) {
-        new JSONRouter(this.__server, dbPath, requestPath, idField).routeJSON();
+        new JSONRouter(this.__server, dbPath, requestPath, idField).route();
     }
 
     upload() {

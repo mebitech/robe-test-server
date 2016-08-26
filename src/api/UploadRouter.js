@@ -1,20 +1,15 @@
 import Class from "../class/Class"
+const multer = require("multer");
 
-export default class JSONRouter extends Class {
+export default class UploadRouter extends Class {
 
     __server;
-    __dbPath;
-    __db;
-    __dbClone;
+    __tempPath;
     __requestPath;
-    __idField;
-
-    constructor(server, dbPath, requestPath, idField) {
+    constructor(server, tempPath, requestPath) {
         super();
         this.__server = server;
         this.__dbPath = dbPath;
-        this.__db = require(this.__dbPath);
-        this.__dbClone = JSON.parse(JSON.stringify(this.__db));
         this.__requestPath = !requestPath ? "/" : requestPath;
         this.__idField = !idField ? "id" : idField;
     }

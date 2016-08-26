@@ -1,4 +1,4 @@
-import Server from "../src/index"
+import Server from "./Server";
 import restify from "restify"
 import chai from "chai";
 
@@ -6,7 +6,7 @@ const expect = chai.expect;
 
 describe("robe-test-server", (done) => {
     let client;
-    let actors = require("../data/data.json").actors;
+    let actors = require("../../data/data.json").actors;
 
     before(() => {
         let server = new Server("test server", 4735);
