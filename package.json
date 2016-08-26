@@ -57,6 +57,7 @@
     "karma-sourcemap-loader": "0.3.7",
     "karma-webpack": "1.8.0",
     "mocha": "3.0.2",
+    "morgan": "1.7.0",
     "restify": "4.1.1",
     "webpack": "1.13.2"
   },

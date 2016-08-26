@@ -1,5 +1,6 @@
 import Class from "../class/Class"
 import restify from "restify"
+import morgan from "morgan"
 import JSONRouter from "./JSONRouter"
 import {decodeQueryParams} from "../util/middlewares"
 
@@ -18,6 +19,7 @@ export default class Server extends Class {
             name: name
         });
         this.__server.use(decodeQueryParams);
+        this.__server.use(morgan("dev"));
         this.__server.use(restify.bodyParser());
         this.__port = port;
         this.__routes = {};
