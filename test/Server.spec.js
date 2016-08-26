@@ -1,5 +1,5 @@
 import chai from "chai";
-import JsServer from "./Server";
+import JsServer from "../src/api/Server";
 
 /** @test {JsServer} **/
 describe("JsServer.js", () => {

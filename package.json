@@ -4,9 +4,9 @@
   "description": "Robe Node Test Server",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha src --recursive --compilers js:babel-register",
+    "test": "mocha test --recursive --compilers js:babel-register",
     "docs": "esdoc -c esdoc.json",
-    "build": "webpack --config webpack.config.build.js  --progress --profile --colors && babel ./src --out-dir ./lib"
+    "build": "babel ./src --out-dir ./lib"
   },
   "keywords": [
     "webpack",
@@ -57,6 +57,7 @@
     "karma-sourcemap-loader": "0.3.7",
     "karma-webpack": "1.8.0",
     "mocha": "3.0.2",
+    "restify": "4.1.1",
     "webpack": "1.13.2"
   },
   "bugs": {

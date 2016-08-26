@@ -1,0 +1,12 @@
+{
+    "actors": [
+        {
+            "id": "1",
+            "name": "öztürk",
+            "surname": "serengil",
+            "films": [
+                "abidik gubidik"
+            ]
+        }
+    ]
+}

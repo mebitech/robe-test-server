@@ -1,1 +1,1 @@
-export {Server as default} from "./api/Server";
+export default from "./api/Server";
