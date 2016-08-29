@@ -4,13 +4,14 @@ import chai from "chai";
 
 const expect = chai.expect;
 
-describe("robe-test-server", (done) => {
+describe("robe-test-server", () => {
+
     let client;
-    let actors = require("../data/data.json").actors;
+    let actors = require("../data/data.json").actors.slice();
 
     before(() => {
         let server = new Server("test server", 4735);
-        server.routeJSON("../../data/data.json", "api/");
+        server.routeJSON("../../data/data.json", "api");
         server.start();
         client = restify.createJsonClient({
             url: 'http://127.0.0.1:4735'
@@ -43,6 +44,7 @@ describe("robe-test-server", (done) => {
             expect(err).to.be.null;
             expect(res.statusCode).to.be.equal(200);
             expect(data).to.be.deep.equal(actors);
+            expect(data.length).to.be.equal(2);
             done();
         });
     });
@@ -57,7 +59,7 @@ describe("robe-test-server", (done) => {
     });
 
     it("should update the actor", (done) => {
-        newActor.films.push("diğer film");
+        newActor.films.push("kart horoz");
         client.put("/api/actors/2", newActor, (err, req, res, data) => {
             expect(err).to.be.null;
             expect(res.statusCode).to.be.equal(200);

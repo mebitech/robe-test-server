@@ -11,7 +11,7 @@ export default class Server extends Class {
 
     __server;
     __port;
-    __routes;
+    __JSONRouter;
 
     constructor(name, port) {
         super();
@@ -22,15 +22,17 @@ export default class Server extends Class {
         this.__server.use(morgan("dev"));
         this.__server.use(restify.bodyParser());
         this.__port = port;
-        this.__routes = {};
+        this.__JSONRouter = new JSONRouter(this.__server);
     }
 
     routeJSON(dbPath, requestPath, idField) {
-        new JSONRouter(this.__server, dbPath, requestPath, idField).routeJSON();
+        this.__JSONRouter.routeJSON(dbPath, requestPath, idField);
+        return this;
     }
 
-    upload() {
-
+    upload(targetDir) {
+        this.__JSONRouter.upload(targetDir);
+        return this;
     }
 
     start() {
