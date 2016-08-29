@@ -4,9 +4,9 @@
   "description": "Robe Node Test Server",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha test --recursive --compilers js:babel-register",
+    "test": "mocha src --recursive  --no-timeouts --compilers js:babel-register",
     "docs": "esdoc -c esdoc.json",
-    "build": "babel ./src --out-dir ./lib"
+    "build": "babel ./src --out-dir ./lib --ignore *.spec.js "
   },
   "keywords": [
     "webpack",
@@ -58,13 +58,21 @@
     "karma-webpack": "1.8.0",
     "mocha": "3.0.2",
     "morgan": "1.7.0",
-    "restify": "4.1.1",
     "webpack": "1.13.2"
   },
   "bugs": {
     "url": "https://github.com/kbukum/robe-test-server/issues"
   },
   "homepage": "https://github.com/kbukum/robe-test-server#readme",
-  "dependencies": {},
+  "dependencies": {
+    "app-root-path": "^1.3.0",
+    "body-parser": "^1.15.2",
+    "escape-string-regexp": "^1.0.5",
+    "form-data": "^1.0.1",
+    "mime": "^1.3.4",
+    "multer": "1.2.0",
+    "restify": "4.1.1",
+    "restify-multipart-body-parser": "^0.1.1"
+  },
   "author": "Kamil Bukum <kamilbukum@gmail.com> (oopdev.org)"
 }

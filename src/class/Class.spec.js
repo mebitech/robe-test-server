@@ -1,5 +1,5 @@
 import chai from "chai";
-import Class from "../src/class/Class";
+import Class from "./Class";
 
 const assert = chai.assert;
 

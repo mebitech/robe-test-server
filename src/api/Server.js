@@ -2,8 +2,10 @@ import Class from "../class/Class"
 import restify from "restify"
 import morgan from "morgan"
 import JSONRouter from "./JSONRouter"
+import UploadRouter from "./UploadRouter"
 import {decodeQueryParams} from "../util/middlewares"
-
+import FileUtility from "../util/FileUtility";
+import bodyParser from "body-parser";
 /**
  * Provide ordering to the result set..
  */
@@ -20,7 +22,8 @@ export default class Server extends Class {
         });
         this.__server.use(decodeQueryParams);
         this.__server.use(morgan("dev"));
-        this.__server.use(restify.bodyParser());
+        this.__server.use(bodyParser.urlencoded());
+        this.__server.use(bodyParser.json());
         this.__port = port;
         this.__JSONRouter = new JSONRouter(this.__server);
     }
@@ -30,9 +33,9 @@ export default class Server extends Class {
         return this;
     }
 
-    upload(targetDir) {
-        this.__JSONRouter.upload(targetDir);
-        return this;
+    routeUpload(tempPath, requestPath, extra) {
+       new UploadRouter(this.__server, tempPath, requestPath, extra).route();
+       return this;
     }
 
     start() {
